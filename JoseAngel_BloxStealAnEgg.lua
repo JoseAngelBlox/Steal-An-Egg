@@ -1,6 +1,6 @@
 -- ==========================================
---  JoseAngel_Blox Steal An Egg Script v1.2
---  Burbuja Flotante + Godmode Mejorado (Invisibilidad)
+--  JoseAngel_Blox Steal An Egg Script v1.3
+--  Sin Godmode | Burbuja Flotante + Auto Place/Sell + Speed
 -- ==========================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -53,7 +53,7 @@ ToggleBubble.Draggable = true
 ToggleBubble.Parent = ScreenGui
 
 local BubbleCorner = Instance.new("UICorner")
-BubbleCorner.CornerRadius = UDim.new(1, 0) -- Hacerlo circular
+BubbleCorner.CornerRadius = UDim.new(1, 0)
 BubbleCorner.Parent = ToggleBubble
 
 local BubbleStroke = Instance.new("UIStroke")
@@ -61,7 +61,6 @@ BubbleStroke.Color = Color3.fromRGB(0, 120, 215)
 BubbleStroke.Thickness = 2
 BubbleStroke.Parent = ToggleBubble
 
--- Forward declaration of frames
 local KeyFrame
 local MainFrame
 
@@ -201,7 +200,7 @@ HeaderSub.Font = Enum.Font.SourceSansItalic
 HeaderSub.TextXAlignment = Enum.TextXAlignment.Left
 HeaderSub.Parent = MainFrame
 
--- Panel Izquierdo (Pestañas y Usuario)
+-- Panel Izquierdo
 local LeftPanel = Instance.new("Frame")
 LeftPanel.Size = UDim2.new(0, 150, 0, 320)
 LeftPanel.Position = UDim2.new(0, 10, 0, 58)
@@ -345,7 +344,7 @@ end
 
 AgregarLabelInfo("Nombre del creador", "JoseAngel_Blox")
 AgregarLabelInfo("Fecha de creación", "16/09/2026")
-AgregarLabelInfo("Versión", "1.2")
+AgregarLabelInfo("Versión", "1.3")
 
 local UpdateFrame = Instance.new("Frame")
 UpdateFrame.Size = UDim2.new(1, 0, 0, 110)
@@ -360,7 +359,7 @@ local UpdateText = Instance.new("TextLabel")
 UpdateText.Size = UDim2.new(1, -16, 1, -16)
 UpdateText.Position = UDim2.new(0, 8, 0, 8)
 UpdateText.BackgroundTransparency = 1
-UpdateText.Text = "Update v1.2: Burbuja flotante agregada para ocultar/mostrar menú. Auto Collect removido. Godmode e Invisibilidad total frente a animales mejorados."
+UpdateText.Text = "Update v1.3: Godmode eliminado. Conserva la burbuja flotante para ocultar/mostrar menú, Auto Place, Auto Sell y Velocidad ajustable."
 UpdateText.TextColor3 = Color3.fromRGB(200, 200, 220)
 UpdateText.TextSize = 13
 UpdateText.Font = Enum.Font.SourceSans
@@ -437,7 +436,6 @@ CrearToggleFuncional("Auto Sell Mascotas", "Teletransporta a SellAll", "isAutoSe
 
 -- 3) UTILIDAD
 local SpeedState = false
-local GodState = false
 
 local SpeedFrame = Instance.new("Frame")
 SpeedFrame.Size = UDim2.new(1, 0, 0, 55)
@@ -482,64 +480,6 @@ SpeedBtn.MouseButton1Click:Connect(function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
             LocalPlayer.Character.Humanoid.WalkSpeed = 16
         end
-    end
-end)
-
-local GodFrame = Instance.new("Frame")
-GodFrame.Size = UDim2.new(1, 0, 0, 55)
-GodFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-GodFrame.Parent = UtilTab
-
-local GdCorner = Instance.new("UICorner")
-GdCorner.CornerRadius = UDim.new(0, 6)
-GdCorner.Parent = GodFrame
-
-local GodTitle = Instance.new("TextLabel")
-GodTitle.Size = UDim2.new(0.7, 0, 0, 20)
-GodTitle.Position = UDim2.new(0, 8, 0, 4)
-GodTitle.BackgroundTransparency = 1
-GodTitle.Text = "Godmode e Invisibilidad"
-GodTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-GodTitle.Font = Enum.Font.SourceSansBold
-GodTitle.TextSize = 14
-GodTitle.TextXAlignment = Enum.TextXAlignment.Left
-GodTitle.Parent = GodFrame
-
-local GodDesc = Instance.new("TextLabel")
-GodDesc.Size = UDim2.new(0.7, 0, 0, 24)
-GodDesc.Position = UDim2.new(0, 8, 0, 24)
-GodDesc.BackgroundTransparency = 1
-GodDesc.Text = "Los animales no te ven ni te hacen daño"
-GodDesc.TextColor3 = Color3.fromRGB(160, 160, 180)
-GodDesc.Font = Enum.Font.SourceSans
-GodDesc.TextSize = 11
-GodDesc.TextXAlignment = Enum.TextXAlignment.Left
-GodDesc.Parent = GodFrame
-
-local GodBtn = Instance.new("TextButton")
-GodBtn.Size = UDim2.new(0.24, 0, 0, 30)
-GodBtn.Position = UDim2.new(0.73, 0, 0.5, -15)
-GodBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
-GodBtn.Text = "OFF"
-GodBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-GodBtn.Font = Enum.Font.SourceSansBold
-GodBtn.TextSize = 12
-GodBtn.Parent = GodFrame
-
-local GdBtnCorner = Instance.new("UICorner")
-GdBtnCorner.CornerRadius = UDim.new(0, 6)
-GdBtnCorner.Parent = GodBtn
-
-GodBtn.MouseButton1Click:Connect(function()
-    GodState = not GodState
-    if GodState then
-        GodBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
-        GodBtn.Text = "ON"
-        GodBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    else
-        GodBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
-        GodBtn.Text = "OFF"
-        GodBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
 end)
 
@@ -614,40 +554,6 @@ task.spawn(function()
     end
 end)
 
--- GODMODE Y SISTEMA DE INVISIBILIDAD FRENTE A ANIMALES
-task.spawn(function()
-    while task.wait(0.2) do
-        if GodState then
-            local char = LocalPlayer.Character
-            if char then
-                -- Desactivar zonas de toque y detección en el personaje
-                for _, part in pairs(char:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanTouch = false
-                        part.CanQuery = false
-                    end
-                end
-
-                -- Mantener la vida al máximo
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.Health = hum.MaxHealth
-                end
-
-                -- Quitar la detección / objetivo de los animales o NPCs
-                for _, npc in pairs(Workspace:GetDescendants()) do
-                    if npc:IsA("Model") and npc ~= char then
-                        local targetVal = npc:FindFirstChild("Target") or npc:FindFirstChild("TargetPlayer") or npc:FindFirstChild("Player")
-                        if targetVal and (targetVal.Value == LocalPlayer or targetVal.Value == char) then
-                            targetVal.Value = nil
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
 -- Bucle físico (WalkSpeed)
 RunService.Stepped:Connect(function()
     if SpeedState and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
@@ -655,4 +561,4 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-print(">>> Script JoseAngel_Blox v1.2 Cargado Correctamente.")
+print(">>> Script JoseAngel_Blox v1.3 Cargado Correctamente.")
