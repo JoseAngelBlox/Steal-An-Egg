@@ -1,6 +1,6 @@
 -- ==========================================
---  JoseAngel_Blox Steal An Egg Script v1.1 (MEJORADO)
---  Diseño Original + Lógica Funcional (Sin Auto Hatch)
+--  JoseAngel_Blox Steal An Egg Script v1.2
+--  Burbuja Flotante + Godmode Mejorado (Invisibilidad)
 -- ==========================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -21,6 +21,8 @@ ScreenGui.Name = "JoseAngel_StealAnEgg"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
+local isKeyVerified = false
+
 -- Función para animar texto azul
 local function AnimarTextoAzul(textLabel)
     task.spawn(function()
@@ -35,9 +37,50 @@ local function AnimarTextoAzul(textLabel)
 end
 
 -- ==========================================
---  SISTEMA DE KEY (Aspecto 4:3 -> 360x270)
+--  BURBUJA FLOTANTE (Para Minimizar/Ocultar Gui)
 -- ==========================================
-local KeyFrame = Instance.new("Frame")
+local ToggleBubble = Instance.new("TextButton")
+ToggleBubble.Name = "ToggleBubble"
+ToggleBubble.Size = UDim2.new(0, 50, 0, 50)
+ToggleBubble.Position = UDim2.new(0.02, 0, 0.3, 0)
+ToggleBubble.BackgroundColor3 = Color3.fromRGB(18, 18, 28)
+ToggleBubble.Text = "JA"
+ToggleBubble.TextColor3 = Color3.fromRGB(0, 170, 255)
+ToggleBubble.Font = Enum.Font.SourceSansBold
+ToggleBubble.TextSize = 20
+ToggleBubble.Active = true
+ToggleBubble.Draggable = true
+ToggleBubble.Parent = ScreenGui
+
+local BubbleCorner = Instance.new("UICorner")
+BubbleCorner.CornerRadius = UDim.new(1, 0) -- Hacerlo circular
+BubbleCorner.Parent = ToggleBubble
+
+local BubbleStroke = Instance.new("UIStroke")
+BubbleStroke.Color = Color3.fromRGB(0, 120, 215)
+BubbleStroke.Thickness = 2
+BubbleStroke.Parent = ToggleBubble
+
+-- Forward declaration of frames
+local KeyFrame
+local MainFrame
+
+ToggleBubble.MouseButton1Click:Connect(function()
+    if not isKeyVerified then
+        if KeyFrame then
+            KeyFrame.Visible = not KeyFrame.Visible
+        end
+    else
+        if MainFrame then
+            MainFrame.Visible = not MainFrame.Visible
+        end
+    end
+end)
+
+-- ==========================================
+--  SISTEMA DE KEY
+-- ==========================================
+KeyFrame = Instance.new("Frame")
 KeyFrame.Name = "KeyFrame"
 KeyFrame.Size = UDim2.new(0, 360, 0, 270)
 KeyFrame.Position = UDim2.new(0.5, -180, 0.5, -135)
@@ -117,9 +160,9 @@ KeyStatus.Font = Enum.Font.SourceSans
 KeyStatus.Parent = KeyFrame
 
 -- ==========================================
---  MENÚ PRINCIPAL (Aspecto 4:3 -> 520x390)
+--  MENÚ PRINCIPAL
 -- ==========================================
-local MainFrame = Instance.new("Frame")
+MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 520, 0, 390)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -195)
@@ -169,7 +212,7 @@ local LeftCorner = Instance.new("UICorner")
 LeftCorner.CornerRadius = UDim.new(0, 10)
 LeftCorner.Parent = LeftPanel
 
--- Perfil de Usuario (Abajo Izquierda)
+-- Perfil de Usuario
 local UserBox = Instance.new("Frame")
 UserBox.Size = UDim2.new(1, -10, 0, 50)
 UserBox.Position = UDim2.new(0, 5, 1, -55)
@@ -190,7 +233,6 @@ local AvatarCorner = Instance.new("UICorner")
 AvatarCorner.CornerRadius = UDim.new(1, 0)
 AvatarCorner.Parent = UserAvatar
 
--- Cargar avatar mediante API directa
 pcall(function()
     UserAvatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LocalPlayer.UserId .. "&width=420&height=420&format=png"
 end)
@@ -303,7 +345,7 @@ end
 
 AgregarLabelInfo("Nombre del creador", "JoseAngel_Blox")
 AgregarLabelInfo("Fecha de creación", "16/09/2026")
-AgregarLabelInfo("Versión", "1.1")
+AgregarLabelInfo("Versión", "1.2")
 
 local UpdateFrame = Instance.new("Frame")
 UpdateFrame.Size = UDim2.new(1, 0, 0, 110)
@@ -318,7 +360,7 @@ local UpdateText = Instance.new("TextLabel")
 UpdateText.Size = UDim2.new(1, -16, 1, -16)
 UpdateText.Position = UDim2.new(0, 8, 0, 8)
 UpdateText.BackgroundTransparency = 1
-UpdateText.Text = "Update: Versión 1.1 Mejorada. Auto Collect, Auto Place (StartArea) y Auto Sell (SellAll) funcionando. Sin Auto Hatch. Disfruta tu farmeo!"
+UpdateText.Text = "Update v1.2: Burbuja flotante agregada para ocultar/mostrar menú. Auto Collect removido. Godmode e Invisibilidad total frente a animales mejorados."
 UpdateText.TextColor3 = Color3.fromRGB(200, 200, 220)
 UpdateText.TextSize = 13
 UpdateText.Font = Enum.Font.SourceSans
@@ -327,11 +369,7 @@ UpdateText.TextXAlignment = Enum.TextXAlignment.Left
 UpdateText.TextYAlignment = Enum.TextYAlignment.Top
 UpdateText.Parent = UpdateFrame
 
--- 2) MAIN (Solo funciones confirmadas y mejoradas)
-local isAutoCollecting = false
-local isAutoPlacing = false
-local isAutoSelling = false
-
+-- 2) MAIN
 local function CrearToggleFuncional(nombre, desc, variableGlobal)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 50)
@@ -381,7 +419,7 @@ local function CrearToggleFuncional(nombre, desc, variableGlobal)
     local estado = false
     Btn.MouseButton1Click:Connect(function()
         estado = not estado
-        _G[variableGlobal] = estado -- Guardamos el estado en una variable global para el bucle
+        _G[variableGlobal] = estado
         if estado then
             Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
             Btn.Text = "ON"
@@ -394,7 +432,6 @@ local function CrearToggleFuncional(nombre, desc, variableGlobal)
     end)
 end
 
-CrearToggleFuncional("Auto Collect Eggs", "Va a huevos (Eggs/Hitbox)", "isAutoCollecting")
 CrearToggleFuncional("Auto Place Eggs", "Va corriendo a StartArea", "isAutoPlacing")
 CrearToggleFuncional("Auto Sell Mascotas", "Teletransporta a SellAll", "isAutoSelling")
 
@@ -415,7 +452,7 @@ local SpeedTitle = Instance.new("TextLabel")
 SpeedTitle.Size = UDim2.new(1, -10, 0, 20)
 SpeedTitle.Position = UDim2.new(0, 8, 0, 4)
 SpeedTitle.BackgroundTransparency = 1
-SpeedTitle.Text = "Velocidad de Movimiento Ajustable"
+SpeedTitle.Text = "Velocidad de Movimiento"
 SpeedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedTitle.Font = Enum.Font.SourceSansBold
 SpeedTitle.TextSize = 14
@@ -461,7 +498,7 @@ local GodTitle = Instance.new("TextLabel")
 GodTitle.Size = UDim2.new(0.7, 0, 0, 20)
 GodTitle.Position = UDim2.new(0, 8, 0, 4)
 GodTitle.BackgroundTransparency = 1
-GodTitle.Text = "Anti-Trampa / Godmode"
+GodTitle.Text = "Godmode e Invisibilidad"
 GodTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 GodTitle.Font = Enum.Font.SourceSansBold
 GodTitle.TextSize = 14
@@ -472,7 +509,7 @@ local GodDesc = Instance.new("TextLabel")
 GodDesc.Size = UDim2.new(0.7, 0, 0, 24)
 GodDesc.Position = UDim2.new(0, 8, 0, 24)
 GodDesc.BackgroundTransparency = 1
-GodDesc.Text = "Protección contra los guardianes y trampas"
+GodDesc.Text = "Los animales no te ven ni te hacen daño"
 GodDesc.TextColor3 = Color3.fromRGB(160, 160, 180)
 GodDesc.Font = Enum.Font.SourceSans
 GodDesc.TextSize = 11
@@ -513,6 +550,7 @@ VerifyBtn.MouseButton1Click:Connect(function()
     if KeyInput.Text == "JoseAngelBlox" then
         KeyStatus.TextColor3 = Color3.fromRGB(0, 220, 130)
         KeyStatus.Text = "Script cargado correctamente"
+        isKeyVerified = true
         task.wait(0.5)
         KeyFrame.Visible = false
         MainFrame.Visible = true
@@ -523,38 +561,12 @@ VerifyBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
---  LÓGICA DEL JUEGO MEJORADA (CEREBRO)
+--  LÓGICA DEL JUEGO
 -- ==========================================
 
--- Configuración de nombres confirmados
-local eggKeywords = {"Eggs", "Hitbox"}
 local deliveryZoneName = "StartArea"
 local sellZoneName = "SellAll"
 
--- Función para encontrar objeto por lista de palabras clave
-local function findNearestByList(keywordsList)
-    local nearest, minDist = nil, math.huge
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
-    local rootPos = char.HumanoidRootPart.Position
-
-    for _, child in pairs(Workspace:GetDescendants()) do
-        if child:IsA("BasePart") then
-            for _, keyword in pairs(keywordsList) do
-                if string.find(child.Name, keyword) and child.CanCollide then
-                    local dist = (child.Position - rootPos).magnitude
-                    if dist < minDist and dist < 300 then
-                        minDist, nearest = dist, child
-                        break
-                    end
-                end
-            end
-        end
-    end
-    return nearest, minDist
-end
-
--- Función para encontrar zona específica
 local function findSpecificZone(zoneName)
     for _, child in pairs(Workspace:GetDescendants()) do
         if string.find(child.Name, zoneName) then
@@ -564,7 +576,7 @@ local function findSpecificZone(zoneName)
     return nil
 end
 
--- Bucle principal optimizado
+-- Bucle Auto Place y Auto Sell
 task.spawn(function()
     while true do
         task.wait(0.5)
@@ -575,15 +587,7 @@ task.spawn(function()
         local root = char:FindFirstChild("HumanoidRootPart")
         if not root then continue end
 
-        -- 1. AUTO COLLECT (Huevos)
-        if _G.isAutoCollecting then
-            local egg, dist = findNearestByList(eggKeywords)
-            if egg and dist > 4 then
-                humanoid:MoveTo(egg.Position)
-            end
-        end
-
-        -- 2. AUTO PLACE (Entrega en StartArea)
+        -- Auto Place
         if _G.isAutoPlacing then
             local startArea = findSpecificZone(deliveryZoneName)
             if startArea then
@@ -594,35 +598,61 @@ task.spawn(function()
             end
         end
 
-        -- 3. AUTO SELL (Teletransporte a SellAll)
+        -- Auto Sell
         if _G.isAutoSelling then
             local sellZone = findSpecificZone(sellZoneName)
             if sellZone then
                 local distToSell = (root.Position - sellZone.Position).magnitude
                 if distToSell > 10 then
-                    -- Teletransporte rápido
                     root.CFrame = sellZone.CFrame + Vector3.new(0, 5, 0)
                     task.wait(1)
                 else
-                    task.wait(3) -- Esperar a que venda
+                    task.wait(3)
                 end
             end
         end
     end
 end)
 
--- Bucle de funciones físicas (Velocidad/Godmode)
-RunService.Stepped:Connect(function()
-    if SpeedState and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 50
-    end
-    if GodState and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanTouch = false
+-- GODMODE Y SISTEMA DE INVISIBILIDAD FRENTE A ANIMALES
+task.spawn(function()
+    while task.wait(0.2) do
+        if GodState then
+            local char = LocalPlayer.Character
+            if char then
+                -- Desactivar zonas de toque y detección en el personaje
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanTouch = false
+                        part.CanQuery = false
+                    end
+                end
+
+                -- Mantener la vida al máximo
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.Health = hum.MaxHealth
+                end
+
+                -- Quitar la detección / objetivo de los animales o NPCs
+                for _, npc in pairs(Workspace:GetDescendants()) do
+                    if npc:IsA("Model") and npc ~= char then
+                        local targetVal = npc:FindFirstChild("Target") or npc:FindFirstChild("TargetPlayer") or npc:FindFirstChild("Player")
+                        if targetVal and (targetVal.Value == LocalPlayer or targetVal.Value == char) then
+                            targetVal.Value = nil
+                        end
+                    end
+                end
             end
         end
     end
 end)
 
-print(">>> Script JoseAngel_Blox v1.1 Cargado. Listo para farmear.")
+-- Bucle físico (WalkSpeed)
+RunService.Stepped:Connect(function()
+    if SpeedState and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 50
+    end
+end)
+
+print(">>> Script JoseAngel_Blox v1.2 Cargado Correctamente.")
