@@ -1,6 +1,6 @@
 -- ==========================================
---  JOSEANGEL_BLOX STEAL AN EGG SCRIPT v1.1
---  Burbuja flotante + Info + Compacto (Sin Auto Hatch)
+--  JoseAngel_Blox Steal An Egg Script v1.1 (MEJORADO)
+--  Diseño Original + Lógica Funcional (Sin Auto Hatch)
 -- ==========================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -9,266 +9,529 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
-local scriptEnabled = false
 
--- Limpiar UI anterior
+-- Eliminar ejecuciones previas
 if CoreGui:FindFirstChild("JoseAngel_StealAnEgg") then
     CoreGui.JoseAngel_StealAnEgg:Destroy()
 end
 
+-- ScreenGui Principal
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_StealAnEgg"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- Burbuja flotante para activar/desactivar todo el script
-local BubbleBtn = Instance.new("TextButton")
-BubbleBtn.Size = UDim2.new(0, 60, 0, 60)
-BubbleBtn.Position = UDim2.new(1, -70, 1, -70)
-BubbleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
-BubbleBtn.Text = "ON"
-BubbleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-BubbleBtn.Font = Enum.Font.SourceSansBold
-BubbleBtn.TextSize = 18
-BubbleBtn.Parent = ScreenGui
-Instance.new("UICorner", BubbleBtn).CornerRadius = UDim.new(1, 0)
+-- Función para animar texto azul
+local function AnimarTextoAzul(textLabel)
+    task.spawn(function()
+        local t = 0
+        while textLabel and textLabel.Parent do
+            t = t + 0.05
+            local blueShade = math.sin(t) * 0.3 + 0.7
+            textLabel.TextColor3 = Color3.fromRGB(0, math.floor(150 * blueShade), 255)
+            task.wait(0.03)
+        end
+    end)
+end
 
-BubbleBtn.MouseButton1Click:Connect(function()
-    scriptEnabled = not scriptEnabled
-    BubbleBtn.Text = scriptEnabled and "ON" or "OFF"
-    BubbleBtn.BackgroundColor3 = scriptEnabled and Color3.fromRGB(0, 170, 127) or Color3.fromRGB(200, 50, 50)
-    print("Script " .. (scriptEnabled and "ACTIVADO" or "DESACTIVADO"))
-end)
+-- ==========================================
+--  SISTEMA DE KEY (Aspecto 4:3 -> 360x270)
+-- ==========================================
+local KeyFrame = Instance.new("Frame")
+KeyFrame.Name = "KeyFrame"
+KeyFrame.Size = UDim2.new(0, 360, 0, 270)
+KeyFrame.Position = UDim2.new(0.5, -180, 0.5, -135)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+KeyFrame.BorderSizePixel = 0
+KeyFrame.Active = true
+KeyFrame.Draggable = true
+KeyFrame.Parent = ScreenGui
 
--- Menú principal compacto
+local KeyCorner = Instance.new("UICorner")
+KeyCorner.CornerRadius = UDim.new(0, 14)
+KeyCorner.Parent = KeyFrame
+
+-- Título Key
+local KeyTitle = Instance.new("TextLabel")
+KeyTitle.Size = UDim2.new(1, 0, 0, 35)
+KeyTitle.Position = UDim2.new(0, 0, 0, 15)
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "JoseAngel_Blox Steal An Egg"
+KeyTitle.TextSize = 18
+KeyTitle.Font = Enum.Font.SourceSansBold
+KeyTitle.Parent = KeyFrame
+AnimarTextoAzul(KeyTitle)
+
+-- Subtítulo Key
+local KeySubTitle = Instance.new("TextLabel")
+KeySubTitle.Size = UDim2.new(1, 0, 0, 20)
+KeySubTitle.Position = UDim2.new(0, 0, 0, 48)
+KeySubTitle.BackgroundTransparency = 1
+KeySubTitle.Text = "Creado por JoseAngel_Blox"
+KeySubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeySubTitle.TextTransparency = 0.5
+KeySubTitle.TextSize = 13
+KeySubTitle.Font = Enum.Font.SourceSansItalic
+KeySubTitle.Parent = KeyFrame
+
+-- Campo de entrada Key
+local KeyInput = Instance.new("TextBox")
+KeyInput.Size = UDim2.new(0.8, 0, 0, 40)
+KeyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
+KeyInput.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+KeyInput.PlaceholderText = "Ingresa la Key..."
+KeyInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
+KeyInput.Text = ""
+KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInput.TextSize = 15
+KeyInput.Font = Enum.Font.SourceSans
+KeyInput.Parent = KeyFrame
+
+local KeyInputCorner = Instance.new("UICorner")
+KeyInputCorner.CornerRadius = UDim.new(0, 8)
+KeyInputCorner.Parent = KeyInput
+
+-- Botón de verificación
+local VerifyBtn = Instance.new("TextButton")
+VerifyBtn.Size = UDim2.new(0.8, 0, 0, 38)
+VerifyBtn.Position = UDim2.new(0.1, 0, 0.6, 10)
+VerifyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+VerifyBtn.Text = "Verificar Key"
+VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerifyBtn.TextSize = 15
+VerifyBtn.Font = Enum.Font.SourceSansBold
+VerifyBtn.Parent = KeyFrame
+
+local VerifyCorner = Instance.new("UICorner")
+VerifyCorner.CornerRadius = UDim.new(0, 8)
+VerifyCorner.Parent = VerifyBtn
+
+-- Estado de la Key
+local KeyStatus = Instance.new("TextLabel")
+KeyStatus.Size = UDim2.new(1, 0, 0, 25)
+KeyStatus.Position = UDim2.new(0, 0, 0.82, 0)
+KeyStatus.BackgroundTransparency = 1
+KeyStatus.Text = ""
+KeyStatus.TextSize = 14
+KeyStatus.Font = Enum.Font.SourceSans
+KeyStatus.Parent = KeyFrame
+
+-- ==========================================
+--  MENÚ PRINCIPAL (Aspecto 4:3 -> 520x390)
+-- ==========================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 300, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -175)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+MainFrame.Size = UDim2.new(0, 520, 0, 390)
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -195)
+MainFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = MainFrame
+
+-- Encabezado del Menú
 local HeaderTitle = Instance.new("TextLabel")
-HeaderTitle.Size = UDim2.new(1, -20, 0, 30)
-HeaderTitle.Position = UDim2.new(0, 10, 0, 10)
+HeaderTitle.Size = UDim2.new(1, -20, 0, 25)
+HeaderTitle.Position = UDim2.new(0, 15, 0, 10)
 HeaderTitle.BackgroundTransparency = 1
 HeaderTitle.Text = "JoseAngel_Blox Steal An Egg"
-HeaderTitle.TextSize = 16
+HeaderTitle.TextSize = 18
 HeaderTitle.Font = Enum.Font.SourceSansBold
-HeaderTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
 HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
 HeaderTitle.Parent = MainFrame
+AnimarTextoAzul(HeaderTitle)
 
-local TabFrame = Instance.new("Frame")
-TabFrame.Size = UDim2.new(1, -10, 0, 30)
-TabFrame.Position = UDim2.new(0, 5, 0, 45)
-TabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-TabFrame.Parent = MainFrame
-Instance.new("UICorner", TabFrame).CornerRadius = UDim.new(0, 8)
+local HeaderSub = Instance.new("TextLabel")
+HeaderSub.Size = UDim2.new(1, -20, 0, 18)
+HeaderSub.Position = UDim2.new(0, 15, 0, 32)
+HeaderSub.BackgroundTransparency = 1
+HeaderSub.Text = "Creado por JoseAngel_Blox"
+HeaderSub.TextColor3 = Color3.fromRGB(255, 255, 255)
+HeaderSub.TextTransparency = 0.5
+HeaderSub.TextSize = 12
+HeaderSub.Font = Enum.Font.SourceSansItalic
+HeaderSub.TextXAlignment = Enum.TextXAlignment.Left
+HeaderSub.Parent = MainFrame
 
-local ContentFrame = Instance.new("ScrollingFrame")
-ContentFrame.Size = UDim2.new(1, -10, 1, -90)
-ContentFrame.Position = UDim2.new(0, 5, 0, 80)
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.ScrollBarThickness = 4
-ContentFrame.Parent = MainFrame
-Instance.new("UIListLayout", ContentFrame).Padding = UDim.new(0, 8)
+-- Panel Izquierdo (Pestañas y Usuario)
+local LeftPanel = Instance.new("Frame")
+LeftPanel.Size = UDim2.new(0, 150, 0, 320)
+LeftPanel.Position = UDim2.new(0, 10, 0, 58)
+LeftPanel.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+LeftPanel.Parent = MainFrame
 
--- Pestañas
-local tabs = {"Info", "Main", "Utilidad"}
-local currentTab = "Info"
+local LeftCorner = Instance.new("UICorner")
+LeftCorner.CornerRadius = UDim.new(0, 10)
+LeftCorner.Parent = LeftPanel
 
-for i, tabName in ipairs(tabs) do
-    local tabBtn = Instance.new("TextButton")
-    tabBtn.Size = UDim2.new(1/3, -2, 1, 0)
-    tabBtn.Position = UDim2.new((i-1)/3, 0, 0, 0)
-    tabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-    tabBtn.Text = tabName
-    tabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    tabBtn.Font = Enum.Font.SourceSansSemibold
-    tabBtn.TextSize = 12
-    tabBtn.Parent = TabFrame
-    
-    tabBtn.MouseButton1Click:Connect(function()
-        currentTab = tabName
-        for _, btn in pairs(TabFrame:GetChildren()) do
-            if btn:IsA("TextButton") then
-                btn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-                btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-            end
+-- Perfil de Usuario (Abajo Izquierda)
+local UserBox = Instance.new("Frame")
+UserBox.Size = UDim2.new(1, -10, 0, 50)
+UserBox.Position = UDim2.new(0, 5, 1, -55)
+UserBox.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+UserBox.Parent = LeftPanel
+
+local UserBoxCorner = Instance.new("UICorner")
+UserBoxCorner.CornerRadius = UDim.new(0, 8)
+UserBoxCorner.Parent = UserBox
+
+local UserAvatar = Instance.new("ImageLabel")
+UserAvatar.Size = UDim2.new(0, 40, 0, 40)
+UserAvatar.Position = UDim2.new(0, 5, 0.5, -20)
+UserAvatar.BackgroundTransparency = 1
+UserAvatar.Parent = UserBox
+
+local AvatarCorner = Instance.new("UICorner")
+AvatarCorner.CornerRadius = UDim.new(1, 0)
+AvatarCorner.Parent = UserAvatar
+
+-- Cargar avatar mediante API directa
+pcall(function()
+    UserAvatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LocalPlayer.UserId .. "&width=420&height=420&format=png"
+end)
+
+local UserNameLabel = Instance.new("TextLabel")
+UserNameLabel.Size = UDim2.new(1, -52, 1, 0)
+UserNameLabel.Position = UDim2.new(0, 48, 0, 0)
+UserNameLabel.BackgroundTransparency = 1
+UserNameLabel.Text = LocalPlayer.Name
+UserNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+UserNameLabel.TextSize = 12
+UserNameLabel.Font = Enum.Font.SourceSansBold
+UserNameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+UserNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+UserNameLabel.Parent = UserBox
+
+-- Contenedor Derecho
+local RightPanel = Instance.new("Frame")
+RightPanel.Size = UDim2.new(0, 340, 0, 320)
+RightPanel.Position = UDim2.new(0, 170, 0, 58)
+RightPanel.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+RightPanel.Parent = MainFrame
+
+local RightCorner = Instance.new("UICorner")
+RightCorner.CornerRadius = UDim.new(0, 10)
+RightCorner.Parent = RightPanel
+
+-- Gestión de Pestañas
+local TabFrames = {}
+local TabButtons = {}
+
+local function CrearPestana(nombre, posOffset)
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Size = UDim2.new(0.9, 0, 0, 35)
+    TabBtn.Position = UDim2.new(0.05, 0, 0, posOffset)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 44)
+    TabBtn.Text = nombre
+    TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    TabBtn.Font = Enum.Font.SourceSansSemibold
+    TabBtn.TextSize = 14
+    TabBtn.Parent = LeftPanel
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 8)
+    BtnCorner.Parent = TabBtn
+
+    local TabContent = Instance.new("ScrollingFrame")
+    TabContent.Size = UDim2.new(1, -16, 1, -16)
+    TabContent.Position = UDim2.new(0, 8, 0, 8)
+    TabContent.BackgroundTransparency = 1
+    TabContent.ScrollBarThickness = 4
+    TabContent.Visible = false
+    TabContent.Parent = RightPanel
+
+    local UIList = Instance.new("UIListLayout")
+    UIList.SortOrder = Enum.SortOrder.LayoutOrder
+    UIList.Padding = UDim.new(0, 8)
+    UIList.Parent = TabContent
+
+    TabButtons[nombre] = TabBtn
+    TabFrames[nombre] = TabContent
+
+    TabBtn.MouseButton1Click:Connect(function()
+        for _, frame in pairs(TabFrames) do frame.Visible = false end
+        for _, btn in pairs(TabButtons) do 
+            btn.BackgroundColor3 = Color3.fromRGB(32, 32, 44)
+            btn.TextColor3 = Color3.fromRGB(200, 200, 200)
         end
-        tabBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        updateContent()
+        TabContent.Visible = true
+        TabBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+
+    return TabContent
+end
+
+local InfoTab = CrearPestana("Info", 10)
+local MainTab = CrearPestana("Main", 50)
+local UtilTab = CrearPestana("Utilidad", 90)
+
+TabFrames["Info"].Visible = true
+TabButtons["Info"].BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+
+-- ==========================================
+--  CONTENIDO DE LAS PESTAÑAS
+-- ==========================================
+
+-- 1) INFO
+local function AgregarLabelInfo(titulo, valor)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 28)
+    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+    Frame.Parent = InfoTab
+    
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = Frame
+
+    local Text = Instance.new("TextLabel")
+    Text.Size = UDim2.new(1, -10, 1, 0)
+    Text.Position = UDim2.new(0, 5, 0, 0)
+    Text.BackgroundTransparency = 1
+    Text.Text = titulo .. ": " .. valor
+    Text.TextColor3 = Color3.fromRGB(220, 220, 240)
+    Text.TextSize = 13
+    Text.Font = Enum.Font.SourceSans
+    Text.TextXAlignment = Enum.TextXAlignment.Left
+    Text.Parent = Frame
+end
+
+AgregarLabelInfo("Nombre del creador", "JoseAngel_Blox")
+AgregarLabelInfo("Fecha de creación", "16/09/2026")
+AgregarLabelInfo("Versión", "1.1")
+
+local UpdateFrame = Instance.new("Frame")
+UpdateFrame.Size = UDim2.new(1, 0, 0, 110)
+UpdateFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+UpdateFrame.Parent = InfoTab
+
+local UpCorner = Instance.new("UICorner")
+UpCorner.CornerRadius = UDim.new(0, 6)
+UpCorner.Parent = UpdateFrame
+
+local UpdateText = Instance.new("TextLabel")
+UpdateText.Size = UDim2.new(1, -16, 1, -16)
+UpdateText.Position = UDim2.new(0, 8, 0, 8)
+UpdateText.BackgroundTransparency = 1
+UpdateText.Text = "Update: Versión 1.1 Mejorada. Auto Collect, Auto Place (StartArea) y Auto Sell (SellAll) funcionando. Sin Auto Hatch. Disfruta tu farmeo!"
+UpdateText.TextColor3 = Color3.fromRGB(200, 200, 220)
+UpdateText.TextSize = 13
+UpdateText.Font = Enum.Font.SourceSans
+UpdateText.TextWrapped = true
+UpdateText.TextXAlignment = Enum.TextXAlignment.Left
+UpdateText.TextYAlignment = Enum.TextYAlignment.Top
+UpdateText.Parent = UpdateFrame
+
+-- 2) MAIN (Solo funciones confirmadas y mejoradas)
+local isAutoCollecting = false
+local isAutoPlacing = false
+local isAutoSelling = false
+
+local function CrearToggleFuncional(nombre, desc, variableGlobal)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 50)
+    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+    Frame.Parent = MainTab
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = Frame
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(0.7, 0, 0, 22)
+    TitleLabel.Position = UDim2.new(0, 8, 0, 4)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = nombre
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.TextSize = 14
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = Frame
+
+    local DescLabel = Instance.new("TextLabel")
+    DescLabel.Size = UDim2.new(0.7, 0, 0, 20)
+    DescLabel.Position = UDim2.new(0, 8, 0, 24)
+    DescLabel.BackgroundTransparency = 1
+    DescLabel.Text = desc
+    DescLabel.TextColor3 = Color3.fromRGB(160, 160, 180)
+    DescLabel.Font = Enum.Font.SourceSans
+    DescLabel.TextSize = 11
+    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DescLabel.Parent = Frame
+
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(0.24, 0, 0, 30)
+    Btn.Position = UDim2.new(0.73, 0, 0.5, -15)
+    Btn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+    Btn.Text = "OFF"
+    Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.TextSize = 12
+    Btn.Parent = Frame
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = Btn
+
+    local estado = false
+    Btn.MouseButton1Click:Connect(function()
+        estado = not estado
+        _G[variableGlobal] = estado -- Guardamos el estado en una variable global para el bucle
+        if estado then
+            Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+            Btn.Text = "ON"
+            Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        else
+            Btn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+            Btn.Text = "OFF"
+            Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        end
     end)
 end
 
--- Contenido de las pestañas
-local function updateContent()
-    for _, child in pairs(ContentFrame:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-    
-    if currentTab == "Info" then
-        -- AQUÍ ESTÁ LA VERSIÓN 1.1
-        local infoItems = {
-            {"Creador", "JoseAngel_Blox"},
-            {"Versión", "1.1"}, 
-            {"Fecha", "16/09/2026"},
-            {"Estado", scriptEnabled and "Activo" or "Inactivo"}
-        }
-        
-        for _, item in ipairs(infoItems) do
-            local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(1, 0, 0, 35)
-            frame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-            frame.Parent = ContentFrame
-            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
-            
-            local text = Instance.new("TextLabel")
-            text.Size = UDim2.new(1, -10, 1, 0)
-            text.Position = UDim2.new(0, 5, 0, 0)
-            text.BackgroundTransparency = 1
-            text.Text = item[1] .. ": " .. item[2]
-            text.TextColor3 = Color3.fromRGB(220, 220, 240)
-            text.TextSize = 13
-            text.Font = Enum.Font.SourceSans
-            text.TextXAlignment = Enum.TextXAlignment.Left
-            text.Parent = frame
-        end
-        
-    elseif currentTab == "Main" then
-        -- Funciones (Sin Auto Hatch)
-        local functions = {
-            {"Auto Collect Eggs", "Va a huevos (Eggs/Hitbox)", "isAutoCollecting"},
-            {"Auto Place Eggs", "Va corriendo a StartArea", "isAutoPlacing"},
-            {"Auto Sell Mascotas", "Teletransporta a SellAll", "isAutoSelling"}
-        }
-        
-        for _, func in ipairs(functions) do
-            local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(1, 0, 0, 50)
-            frame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-            frame.Parent = ContentFrame
-            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
-            
-            local title = Instance.new("TextLabel")
-            title.Size = UDim2.new(0.7, 0, 0, 20)
-            title.Position = UDim2.new(0, 8, 0, 4)
-            title.BackgroundTransparency = 1
-            title.Text = func[1]
-            title.TextColor3 = Color3.fromRGB(255, 255, 255)
-            title.Font = Enum.Font.SourceSansBold
-            title.TextSize = 13
-            title.TextXAlignment = Enum.TextXAlignment.Left
-            title.Parent = frame
-            
-            local desc = Instance.new("TextLabel")
-            desc.Size = UDim2.new(0.7, 0, 0, 18)
-            desc.Position = UDim2.new(0, 8, 0, 24)
-            desc.BackgroundTransparency = 1
-            desc.Text = func[2]
-            desc.TextColor3 = Color3.fromRGB(160, 160, 180)
-            desc.Font = Enum.Font.SourceSans
-            desc.TextSize = 10
-            desc.TextXAlignment = Enum.TextXAlignment.Left
-            desc.Parent = frame
-            
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(0.25, 0, 0, 28)
-            btn.Position = UDim2.new(0.72, 0, 0.5, -14)
-            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-            btn.Text = "OFF"
-            btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-            btn.Font = Enum.Font.SourceSansBold
-            btn.TextSize = 11
-            btn.Parent = frame
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-            
-            local enabled = false
-            btn.MouseButton1Click:Connect(function()
-                enabled = not enabled
-                _G[func[3]] = enabled
-                btn.Text = enabled and "ON" or "OFF"
-                btn.BackgroundColor3 = enabled and Color3.fromRGB(0, 170, 127) or Color3.fromRGB(50, 50, 70)
-                btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            end)
-        end
-        
-    elseif currentTab == "Utilidad" then
-        local speedFrame = Instance.new("Frame")
-        speedFrame.Size = UDim2.new(1, 0, 0, 45)
-        speedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-        speedFrame.Parent = ContentFrame
-        Instance.new("UICorner", speedFrame).CornerRadius = UDim.new(0, 6)
-        
-        local speedTitle = Instance.new("TextLabel")
-        speedTitle.Size = UDim2.new(1, -10, 0, 20)
-        speedTitle.Position = UDim2.new(0, 8, 0, 4)
-        speedTitle.BackgroundTransparency = 1
-        speedTitle.Text = "Velocidad Rápida (50 WalkSpeed)"
-        speedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-        speedTitle.Font = Enum.Font.SourceSansBold
-        speedTitle.TextSize = 13
-        speedTitle.TextXAlignment = Enum.TextXAlignment.Left
-        speedTitle.Parent = speedFrame
-        
-        local speedBtn = Instance.new("TextButton")
-        speedBtn.Size = UDim2.new(0.9, 0, 0, 22)
-        speedBtn.Position = UDim2.new(0.05, 0, 0, 20)
-        speedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-        speedBtn.Text = "Activar"
-        speedBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        speedBtn.Font = Enum.Font.SourceSans
-        speedBtn.TextSize = 11
-        speedBtn.Parent = speedFrame
-        Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 4)
-        
-        local speedEnabled = false
-        speedBtn.MouseButton1Click:Connect(function()
-            speedEnabled = not speedEnabled
-            speedBtn.BackgroundColor3 = speedEnabled and Color3.fromRGB(0, 170, 127) or Color3.fromRGB(50, 50, 70)
-            speedBtn.Text = speedEnabled and "Desactivar" or "Activar"
-            speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            _G.SpeedState = speedEnabled
-        end)
-    end
-end
+CrearToggleFuncional("Auto Collect Eggs", "Va a huevos (Eggs/Hitbox)", "isAutoCollecting")
+CrearToggleFuncional("Auto Place Eggs", "Va corriendo a StartArea", "isAutoPlacing")
+CrearToggleFuncional("Auto Sell Mascotas", "Teletransporta a SellAll", "isAutoSelling")
 
--- Botón para abrir/cerrar menú
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 80, 0, 30)
-ToggleBtn.Position = UDim2.new(0.5, -40, 0, 10)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-ToggleBtn.Text = "Abrir Menú"
-ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.Font = Enum.Font.SourceSansBold
-ToggleBtn.TextSize = 14
-ToggleBtn.Parent = ScreenGui
-Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 6)
+-- 3) UTILIDAD
+local SpeedState = false
+local GodState = false
 
-ToggleBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-    ToggleBtn.Text = MainFrame.Visible and "Cerrar Menú" or "Abrir Menú"
+local SpeedFrame = Instance.new("Frame")
+SpeedFrame.Size = UDim2.new(1, 0, 0, 55)
+SpeedFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+SpeedFrame.Parent = UtilTab
+
+local SpCorner = Instance.new("UICorner")
+SpCorner.CornerRadius = UDim.new(0, 6)
+SpCorner.Parent = SpeedFrame
+
+local SpeedTitle = Instance.new("TextLabel")
+SpeedTitle.Size = UDim2.new(1, -10, 0, 20)
+SpeedTitle.Position = UDim2.new(0, 8, 0, 4)
+SpeedTitle.BackgroundTransparency = 1
+SpeedTitle.Text = "Velocidad de Movimiento Ajustable"
+SpeedTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedTitle.Font = Enum.Font.SourceSansBold
+SpeedTitle.TextSize = 14
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedTitle.Parent = SpeedFrame
+
+local SpeedBtn = Instance.new("TextButton")
+SpeedBtn.Size = UDim2.new(0.95, 0, 0, 24)
+SpeedBtn.Position = UDim2.new(0.025, 0, 0, 26)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+SpeedBtn.Text = "Activar Velocidad Rápida (50 WalkSpeed)"
+SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBtn.Font = Enum.Font.SourceSans
+SpeedBtn.TextSize = 12
+SpeedBtn.Parent = SpeedFrame
+
+local SpBtnCorner = Instance.new("UICorner")
+SpBtnCorner.CornerRadius = UDim.new(0, 4)
+SpBtnCorner.Parent = SpeedBtn
+
+SpeedBtn.MouseButton1Click:Connect(function()
+    SpeedState = not SpeedState
+    if SpeedState then
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+    else
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
+    end
 end)
 
-updateContent()
+local GodFrame = Instance.new("Frame")
+GodFrame.Size = UDim2.new(1, 0, 0, 55)
+GodFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+GodFrame.Parent = UtilTab
+
+local GdCorner = Instance.new("UICorner")
+GdCorner.CornerRadius = UDim.new(0, 6)
+GdCorner.Parent = GodFrame
+
+local GodTitle = Instance.new("TextLabel")
+GodTitle.Size = UDim2.new(0.7, 0, 0, 20)
+GodTitle.Position = UDim2.new(0, 8, 0, 4)
+GodTitle.BackgroundTransparency = 1
+GodTitle.Text = "Anti-Trampa / Godmode"
+GodTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+GodTitle.Font = Enum.Font.SourceSansBold
+GodTitle.TextSize = 14
+GodTitle.TextXAlignment = Enum.TextXAlignment.Left
+GodTitle.Parent = GodFrame
+
+local GodDesc = Instance.new("TextLabel")
+GodDesc.Size = UDim2.new(0.7, 0, 0, 24)
+GodDesc.Position = UDim2.new(0, 8, 0, 24)
+GodDesc.BackgroundTransparency = 1
+GodDesc.Text = "Protección contra los guardianes y trampas"
+GodDesc.TextColor3 = Color3.fromRGB(160, 160, 180)
+GodDesc.Font = Enum.Font.SourceSans
+GodDesc.TextSize = 11
+GodDesc.TextXAlignment = Enum.TextXAlignment.Left
+GodDesc.Parent = GodFrame
+
+local GodBtn = Instance.new("TextButton")
+GodBtn.Size = UDim2.new(0.24, 0, 0, 30)
+GodBtn.Position = UDim2.new(0.73, 0, 0.5, -15)
+GodBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+GodBtn.Text = "OFF"
+GodBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+GodBtn.Font = Enum.Font.SourceSansBold
+GodBtn.TextSize = 12
+GodBtn.Parent = GodFrame
+
+local GdBtnCorner = Instance.new("UICorner")
+GdBtnCorner.CornerRadius = UDim.new(0, 6)
+GdBtnCorner.Parent = GodBtn
+
+GodBtn.MouseButton1Click:Connect(function()
+    GodState = not GodState
+    if GodState then
+        GodBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+        GodBtn.Text = "ON"
+        GodBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        GodBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+        GodBtn.Text = "OFF"
+        GodBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    end
+end)
 
 -- ==========================================
---  LÓGICA DEL JUEGO (SIN AUTO HATCH)
+--  LÓGICA DE KEY
+-- ==========================================
+VerifyBtn.MouseButton1Click:Connect(function()
+    if KeyInput.Text == "JoseAngelBlox" then
+        KeyStatus.TextColor3 = Color3.fromRGB(0, 220, 130)
+        KeyStatus.Text = "Script cargado correctamente"
+        task.wait(0.5)
+        KeyFrame.Visible = false
+        MainFrame.Visible = true
+    else
+        KeyStatus.TextColor3 = Color3.fromRGB(255, 70, 70)
+        KeyStatus.Text = "Key inválida"
+    end
+end)
+
+-- ==========================================
+--  LÓGICA DEL JUEGO MEJORADA (CEREBRO)
 -- ==========================================
 
--- Configuración
+-- Configuración de nombres confirmados
 local eggKeywords = {"Eggs", "Hitbox"}
 local deliveryZoneName = "StartArea"
 local sellZoneName = "SellAll"
 
--- Funciones de búsqueda
+-- Función para encontrar objeto por lista de palabras clave
 local function findNearestByList(keywordsList)
     local nearest, minDist = nil, math.huge
     local char = LocalPlayer.Character
@@ -291,6 +554,7 @@ local function findNearestByList(keywordsList)
     return nearest, minDist
 end
 
+-- Función para encontrar zona específica
 local function findSpecificZone(zoneName)
     for _, child in pairs(Workspace:GetDescendants()) do
         if string.find(child.Name, zoneName) then
@@ -304,7 +568,6 @@ end
 task.spawn(function()
     while true do
         task.wait(0.5)
-        if not scriptEnabled then continue end
         
         local char = LocalPlayer.Character
         if not char or not char:FindFirstChild("Humanoid") then continue end
@@ -312,7 +575,7 @@ task.spawn(function()
         local root = char:FindFirstChild("HumanoidRootPart")
         if not root then continue end
 
-        -- Auto Collect
+        -- 1. AUTO COLLECT (Huevos)
         if _G.isAutoCollecting then
             local egg, dist = findNearestByList(eggKeywords)
             if egg and dist > 4 then
@@ -320,34 +583,46 @@ task.spawn(function()
             end
         end
 
-        -- Auto Place
+        -- 2. AUTO PLACE (Entrega en StartArea)
         if _G.isAutoPlacing then
             local startArea = findSpecificZone(deliveryZoneName)
-            if startArea and (root.Position - startArea.Position).magnitude > 5 then
-                humanoid:MoveTo(startArea.Position)
+            if startArea then
+                local distToBase = (root.Position - startArea.Position).magnitude
+                if distToBase > 5 then
+                    humanoid:MoveTo(startArea.Position)
+                end
             end
         end
 
-        -- Auto Sell
+        -- 3. AUTO SELL (Teletransporte a SellAll)
         if _G.isAutoSelling then
             local sellZone = findSpecificZone(sellZoneName)
             if sellZone then
-                if (root.Position - sellZone.Position).magnitude > 10 then
+                local distToSell = (root.Position - sellZone.Position).magnitude
+                if distToSell > 10 then
+                    -- Teletransporte rápido
                     root.CFrame = sellZone.CFrame + Vector3.new(0, 5, 0)
                     task.wait(1)
                 else
-                    task.wait(3)
+                    task.wait(3) -- Esperar a que venda
                 end
             end
         end
     end
 end)
 
--- Utilidades
+-- Bucle de funciones físicas (Velocidad/Godmode)
 RunService.Stepped:Connect(function()
-    if _G.SpeedState and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+    if SpeedState and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = 50
+    end
+    if GodState and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanTouch = false
+            end
+        end
     end
 end)
 
-print(">>> Script JoseAngel_Blox v1.1 Cargado. Listo para usar.")
+print(">>> Script JoseAngel_Blox v1.1 Cargado. Listo para farmear.")
