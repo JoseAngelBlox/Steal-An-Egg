@@ -5,7 +5,6 @@
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -20,7 +19,7 @@ ScreenGui.Name = "JoseAngel_StealAnEgg"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- Función para animar texto azul brillante/en movimiento
+-- Función para animar texto azul
 local function AnimarTextoAzul(textLabel)
     task.spawn(function()
         local t = 0
@@ -189,20 +188,16 @@ local AvatarCorner = Instance.new("UICorner")
 AvatarCorner.CornerRadius = UDim.new(1, 0)
 AvatarCorner.Parent = UserAvatar
 
--- Cargar foto de perfil
+-- Cargar avatar mediante API directa para evitar nil values
 pcall(function()
-    local userId = LocalPlayer.UserId
-    local thumbType = Enum.ThumbnailType.HeadShot
-    local thumbSize = Enum.ThumbnailSize.Size420x420
-    local content, _ = Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
-    UserAvatar.Image = content
+    UserAvatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LocalPlayer.UserId .. "&width=420&height=420&format=png"
 end)
 
 local UserNameLabel = Instance.new("TextLabel")
 UserNameLabel.Size = UDim2.new(1, -52, 1, 0)
 UserNameLabel.Position = UDim2.new(0, 48, 0, 0)
 UserNameLabel.BackgroundTransparency = 1
-UserNameLabel.Text = LocalPlayer.DisplayName
+UserNameLabel.Text = LocalPlayer.Name
 UserNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 UserNameLabel.TextSize = 12
 UserNameLabel.Font = Enum.Font.SourceSansBold
@@ -210,7 +205,7 @@ UserNameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 UserNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 UserNameLabel.Parent = UserBox
 
--- Contenedor Derecho (Pestañas)
+-- Contenedor Derecho
 local RightPanel = Instance.new("Frame")
 RightPanel.Size = UDim2.new(0, 340, 0, 320)
 RightPanel.Position = UDim2.new(0, 170, 0, 58)
@@ -225,7 +220,7 @@ RightCorner.Parent = RightPanel
 local TabFrames = {}
 local TabButtons = {}
 
-local function CrearPestaña(nombre, posOffset)
+local function CrearPestana(nombre, posOffset)
     local TabBtn = Instance.new("TextButton")
     TabBtn.Size = UDim2.new(0.9, 0, 0, 35)
     TabBtn.Position = UDim2.new(0.05, 0, 0, posOffset)
@@ -270,11 +265,10 @@ local function CrearPestaña(nombre, posOffset)
     return TabContent
 end
 
-local InfoTab = CrearPestaña("Info", 10)
-local MainTab = CrearPestaña("Main", 50)
-local UtilTab = CrearPestaña("Utilidad", 90)
+local InfoTab = CrearPestana("Info", 10)
+local MainTab = CrearPestana("Main", 50)
+local UtilTab = CrearPestana("Utilidad", 90)
 
--- Pestaña por defecto activa
 TabFrames["Info"].Visible = true
 TabButtons["Info"].BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
@@ -282,7 +276,7 @@ TabButtons["Info"].BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 --  CONTENIDO DE LAS PESTAÑAS
 -- ==========================================
 
--- 1) PESTAÑA INFO
+-- 1) INFO
 local function AgregarLabelInfo(titulo, valor)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 28)
@@ -297,11 +291,10 @@ local function AgregarLabelInfo(titulo, valor)
     Text.Size = UDim2.new(1, -10, 1, 0)
     Text.Position = UDim2.new(0, 5, 0, 0)
     Text.BackgroundTransparency = 1
-    Text.Text = "<b>" .. titulo .. ":</b> " .. valor
+    Text.Text = titulo .. ": " .. valor
     Text.TextColor3 = Color3.fromRGB(220, 220, 240)
     Text.TextSize = 13
     Text.Font = Enum.Font.SourceSans
-    Text.RichText = true
     Text.TextXAlignment = Enum.TextXAlignment.Left
     Text.Parent = Frame
 end
@@ -310,7 +303,6 @@ AgregarLabelInfo("Nombre del creador", "JoseAngel_Blox")
 AgregarLabelInfo("Fecha de creación", "15/09/2026")
 AgregarLabelInfo("Versión", "1.1")
 
--- Cuadro de Update
 local UpdateFrame = Instance.new("Frame")
 UpdateFrame.Size = UDim2.new(1, 0, 0, 110)
 UpdateFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
@@ -324,19 +316,16 @@ local UpdateText = Instance.new("TextLabel")
 UpdateText.Size = UDim2.new(1, -16, 1, -16)
 UpdateText.Position = UDim2.new(0, 8, 0, 8)
 UpdateText.BackgroundTransparency = 1
-UpdateText.Text = "<b>Update:</b> Bienvenido y bienvenida a mi script este script es uno de lo mas básicos para este juego espero y disfrutes del script atentamente JoseAngel_Blox"
+UpdateText.Text = "Update: Bienvenido y bienvenida a mi script este script es uno de lo mas básicos para este juego espero y disfrutes del script atentamente JoseAngel_Blox"
 UpdateText.TextColor3 = Color3.fromRGB(200, 200, 220)
 UpdateText.TextSize = 13
 UpdateText.Font = Enum.Font.SourceSans
-UpdateText.RichText = true
 UpdateText.TextWrapped = true
 UpdateText.TextXAlignment = Enum.TextXAlignment.Left
 UpdateText.TextYAlignment = Enum.TextYAlignment.Top
 UpdateText.Parent = UpdateFrame
 
--- 2) PESTAÑA MAIN (Funciones)
-local Toggles = {}
-
+-- 2) MAIN
 local function CrearToggle(nombre, desc, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 50)
@@ -386,7 +375,6 @@ local function CrearToggle(nombre, desc, callback)
     local estado = false
     Btn.MouseButton1Click:Connect(function()
         estado = not estado
-        Toggles[nombre] = estado
         if estado then
             Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
             Btn.Text = "ON"
@@ -408,7 +396,7 @@ CrearToggle("Auto Sell Mascotas", "Vende duplicados/comunes y protege ganancias"
 CrearToggle("Auto Reclamar Ganancias", "Recoge el dinero y recompensas", function(state) end)
 CrearToggle("Auto Mejorar Base", "Mejora velocidad y cinta cuando hay dinero", function(state) end)
 
--- 3) PESTAÑA UTILIDAD
+-- 3) UTILIDAD
 local SpeedState = false
 local GodState = false
 
@@ -458,7 +446,6 @@ SpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Toggle Godmode
 local GodFrame = Instance.new("Frame")
 GodFrame.Size = UDim2.new(1, 0, 0, 55)
 GodFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
@@ -518,13 +505,13 @@ GodBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
---  LÓGICA DE VERIFICACIÓN DE KEY
+--  LÓGICA DE KEY
 -- ==========================================
 VerifyBtn.MouseButton1Click:Connect(function()
     if KeyInput.Text == "JoseAngelBlox" then
         KeyStatus.TextColor3 = Color3.fromRGB(0, 220, 130)
         KeyStatus.Text = "Script cargado correctamente"
-        task.wait(1)
+        task.wait(0.5)
         KeyFrame.Visible = false
         MainFrame.Visible = true
     else
@@ -533,7 +520,7 @@ VerifyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Bucle en segundo plano para WalkSpeed y Godmode
+-- Bucle de funciones físicas
 RunService.Stepped:Connect(function()
     if SpeedState and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = 50
